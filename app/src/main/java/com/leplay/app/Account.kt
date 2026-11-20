@@ -2751,7 +2751,7 @@ object InnerTube {
         parseIndonesianViews(raw)?.let { return it }
         val t = raw.replace(",", "")
         if (t.startsWith("no ") || t.startsWith("कोई ") || t.startsWith("sin ")) return 0
-        if ("करोड़" in t || "cr" in t) {
+        if ("करोड़" in t || Regex("""\d\s*cr\b""").containsMatchIn(t)) {
             val num = Regex("([\\d.]+)").find(t)?.groupValues?.get(1)?.toDoubleOrNull() ?: return -1
             return (num * 10_000_000).toLong()
         }
