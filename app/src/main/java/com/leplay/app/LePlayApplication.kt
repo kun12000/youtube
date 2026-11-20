@@ -1,0 +1,70 @@
+package com.leplay.app
+
+import android.app.Application
+import android.content.Context
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import coil.memory.MemoryCache
+import com.leplay.app.potoken.PoTokenGenerator
+import org.schabi.newpipe.extractor.NewPipe
+import org.schabi.newpipe.extractor.services.youtube.extractors.YoutubeStreamExtractor
+
+class LePlayApplication : Application(), ImageLoaderFactory {
+
+    companion object {
+        lateinit var appContext: Context
+            private set
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        appContext = applicationContext
+        TvMode.init(this)
+        LanguageSettings.init(this)
+        GlassQuality.init(this)
+        GlassSettings.init(this)
+        NetworkSpeed.init(this)
+        PlaybackBandwidth.init(this)
+        NewPipe.init(NewPipeDownloader.instance)
+
+
+        val poTokenGenerator = PoTokenGenerator()
+        poTokenGenerator.initialize()
+        YoutubeStreamExtractor.setPoTokenProvider(LePlayPoTokenProvider(poTokenGenerator))
+
+
+        YoutubeStreamExtractor.setFetchIosClient(true)
+        HdrItags.install()
+        ThemeSettings.init(this)
+        HdrSupport.init(this)
+        QualityPreference.init(this)
+        PlaybackSpeed.init(this)
+        AudioOnly.init(this)
+        AudioTrackPreference.init(this)
+        CaptionPreference.init(this)
+        VideoGestureSettings.init(this)
+        HapticsSettings.init(this)
+        PlayerControlSettings.init(this)
+        PipSettings.init(this)
+        MiniPlayerSettings.init(this)
+        ShortsSettings.init(this)
+        ResumeStore.init(this)
+        Account.init(this)
+        SponsorBlock.init(this)
+        SearchHistory.init(this)
+        Downloads.init(this)
+
+        // Note 53 item 6: the resolved-stream cache is intentionally NOT
+        // wiped on network changes anymore. Switching WiFi to data used to
+        // throw away every resolved stream, so even a video played minutes
+        // earlier paid a full extraction again. Stale URLs are handled by
+        // the playback recovery path, which re-resolves only the one video
+        // that actually fails.
+    }
+
+
+    override fun newImageLoader(): ImageLoader = ImageLoader.Builder(this)
+        .crossfade(180)
+        .memoryCache { MemoryCache.Builder(this).maxSizePercent(0.25).build() }
+        .build()
+}
